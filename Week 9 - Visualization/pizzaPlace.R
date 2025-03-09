@@ -61,12 +61,15 @@ table(pizzaSales$name)
 # Create a table of pizza types and sizes
 pizzaSizeCounts <- table(pizzaSales$type, pizzaSales$size)
 
+
+# Pizza types by size bar plot
 barplot(pizzaSizeCounts, 
         col = brewer.pal(n = 4, name = "Set2"), 
         legend = rownames(pizzaSizeCounts),
         main = "Pizza Types by Size",
         xlab = "Pizza Type", 
-        ylab = "Count")
+        ylab = "Count",
+        ylim = c(0, 20000))
 
 ### 2. Graphic using lattice package ###
 
@@ -92,5 +95,3 @@ ggplot(pizzaSales, aes(x = price, y = size, color = type)) +
   theme_minimal() +                                   # Clean theme
   scale_color_brewer(palette = "Set2") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) # Rotate x-axis label
-
-
