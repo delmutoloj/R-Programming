@@ -1,0 +1,72 @@
+---
+title: "finViz Demo"
+author: "James Del Mutolo"
+date: "2025-04-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## finViz Package
+
+The finViz package depends on the NetworkD3 package which contains functions for creating a Sankey diagram. A Sankey diagram can be used for visualizing the flow of money through different categories and merchants.
+
+The functions in the finViz package are used on .csv files that must be organized in a certain manner. The files must contain columns for: Date, Merchant, Category, and Amount.
+
+## Loading the finViz Package
+The finViz package can be installed directly from GitHub using the install_github() function from devtools.
+
+```{r, eval = FALSE}
+devtools::install_github("delmutoloj/finViz")
+```
+
+## Datasets
+
+Functions in the finViz package are passed names of csv files that are then read into r within the function. csv files can not be included in an R package in the same way .rda files are. Because of this, the .csv files must be downloaded separately.
+
+```{r}
+setwd("G:/My Drive/USF/R Programming/Week 12 - R Markdown")
+
+# Read deposits example file
+deposits <- read.csv("deposits.csv")
+
+
+# List of statement data to pass to mergeStatementDF()
+statements <- list("credit_statement1.csv",
+                   "credit_statement2.csv",
+                   "checking_statement.csv")
+```
+
+## Functions
+
+**statementCombine()**
+
+Reads and combines multiple financial statement .csv files into a single data frame. It ensures the Date column is properly formatted and orders the data chronologically.
+
+```{r}
+library(finViz)
+
+# Read the csv files into R, and combine the statements.
+spending <- statementCombine(statements)
+```
+
+**financialSummary()**
+
+Generates a summary of financial data, including total income, total expenses, net balance, and aggregated amounts by category and merchant.
+
+```{r}
+# Print financial summary
+financialSummary(deposits, spending)
+```
+
+**financialSankey()**
+
+Generates an interactive Sankey diagram to visualize income allocation and spending patterns. It dynamically determines income categories from the deposit data and structures financial transactions into a hierarchical flow, showing how income is distributed across expense categories and vendors.
+
+```{r, dpi = 150, out.width = "900px"}
+# Create sankey diagram
+sankey <- financialSankey(deposits, spending)
+sankey
+```

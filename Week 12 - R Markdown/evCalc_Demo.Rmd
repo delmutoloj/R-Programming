@@ -1,0 +1,137 @@
+---
+title: "evCalc Demo"
+author: "James Del Mutolo"
+date: "2025-04-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## evCalc Package
+
+The evCalc (Electric Vehicle Calculator) package contains functions for calculating metrics such as efficiency, estimated range, battery degradation, etc, from raw OBD2 data gathered from an electric vehicle.
+
+## Loading the evCalc Package
+The evCalc package can be installed directly from GitHub using the install_github() function from devtools.
+
+```{r, eval = FALSE}
+devtools::install_github("delmutoloj/evCalc")
+```
+
+## Datasets
+
+The evCalc package contains the following datasets:
+
+**In-city traffic** – Log for in-city driving, used for calculating efficiency (in progress)
+
+**Speed depenant** – Separate logs from driving at a constant speed of 50, 60, 70, and 80 mph. Used for comparing efficiency at different speeds.
+
+**Full discharge** – Very lengthy log of as close to a full discharge as possible (preferably 100%-5%). Used to calculate degradation.
+
+**DC fast charging session** – Log of power and temperature during a DC fast charging session. Used to create charging curve.
+
+## Functions
+
+**duration()**
+
+Simply returns the duration of logging dataset in minutes.
+
+```{r}
+library(evCalc)
+
+duration(log_degradation)
+
+duration(log_40mph)
+```
+
+**capacity()**
+
+Estimate total battery capacity in kWh.
+
+```{r}
+capacity(log_degradation)
+```
+
+We calculate 62.16 kWh of usable energy.
+
+**degradation()**
+
+Compare estimated battery capacity to factory capacity (66 kWh) to calculate degradation in percent decrease.
+
+```{r}
+degradation(log_degradation, 66)
+```
+
+We calculate a 5.8% decrease in total battery capacity.
+
+**estimatedRange()**
+
+The estimatedRange() function calculates range in miles based on the efficiency and projected battery capaicty of a given log.
+
+```{r}
+estimatedRange(log_degradation)
+
+estimatedRange(log_90mph)
+```
+
+## Comparing Efficiency
+
+Lets use the included datasets to compare vehicle efficiency at different speeds.
+
+```{r}
+library(ggplot2)
+
+# Calculate efficiency at different speeds, store results in table
+eff_table <- data.frame(
+  Speed_mph = c(40, 50, 60, 70, 80, 90),
+  Efficiency_mi_per_kWh = c(
+    efficiency(log_40mph),
+    efficiency(log_50mph),
+    efficiency(log_60mph),
+    efficiency(log_70mph),
+    efficiency(log_80mph),
+    efficiency(log_90mph)
+  )
+)
+
+# Print efficiency table
+print(eff_table)
+
+# Barplot for efficiency by speed
+ggplot(eff_table, aes(x = factor(Speed_mph), y = Efficiency_mi_per_kWh)) +
+  geom_bar(stat = "identity", fill = "#2E86AB") +
+  labs(
+    title = "EV Efficiency by Speed",
+    x = "Speed (mph)",
+    y = "Efficiency (mi/kWh)"
+  ) +
+  theme_minimal()
+
+# Calculate range given 62 kWh estimated capacity, store results in table.
+range_table <- data.frame(
+  Speed_mph = c(40, 50, 60, 70, 80, 90),
+  Range_mi = c(
+    efficiency(log_40mph) * 62,
+    efficiency(log_50mph) * 62,
+    efficiency(log_60mph) * 62,
+    efficiency(log_70mph) * 62,
+    efficiency(log_80mph) * 62,
+    efficiency(log_90mph) * 62
+  )
+)
+
+# Print range table
+print(range_table)
+
+# Barplot for range by speed
+ggplot(range_table, aes(x = factor(Speed_mph), y = Range_mi)) +
+  geom_bar(stat = "identity", fill = "#2E86AB") +
+  labs(
+    title = "EV Range by Speed",
+    x = "Speed (mph)",
+    y = "Range (mi)"
+  ) +
+  theme_minimal()
+```
